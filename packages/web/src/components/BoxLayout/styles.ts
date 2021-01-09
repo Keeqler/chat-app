@@ -2,16 +2,17 @@ import styled from 'styled-components'
 
 export const LayoutContainer = styled.div`
   width: 100%;
-  height: 100%;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
   padding: 20px 20px;
   background: #422bd0;
 `
 
 export const Box = styled.main`
-  width: 600px;
-  min-height: 720px;
-  margin: auto;
+  width: 100%;
+  max-width: 600px;
   padding: 20px;
   position: relative;
   display: flex;

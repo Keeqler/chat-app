@@ -7,14 +7,16 @@ import * as s from './styles'
 
 export const Home = () => (
   <BoxLayout title="Hi there!">
-    <s.Buttons>
-      <Link to="/signIn">
-        <OutlinedButton>I already have an account</OutlinedButton>
-      </Link>
+    <s.Content>
+      <s.Buttons>
+        <Link to="/signIn">
+          <OutlinedButton>Log in</OutlinedButton>
+        </Link>
 
-      <Link to="/signUp">
-        <StandardButton>I don&apos;t have an account</StandardButton>
-      </Link>
-    </s.Buttons>
+        <Link to="/signUp">
+          <StandardButton>Register</StandardButton>
+        </Link>
+      </s.Buttons>
+    </s.Content>
   </BoxLayout>
 )

@@ -9,11 +9,13 @@ import { errorHandler } from './errors'
 
 const app = express()
 
-app.use(cors())
+const origin = process.env.NODE_ENV === 'production' ? process.env.WEB_URL : '*'
+
+app.use(cors({ origin }))
 app.use(express.json())
 app.use(routes)
 app.use('/images', express.static(path.join(__dirname, '..', 'uploads')))
 app.use(errorHandler)
 
 export const httpServer = http.createServer(app)
-export const io = new socketIo.Server(httpServer, { cors: { origin: '*' } })
+export const io = new socketIo.Server(httpServer, { cors: { origin: process.env.WEB_URL } })

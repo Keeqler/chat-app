@@ -22,8 +22,7 @@ export const Input = styled.input`
   background: #f4f4f4;
   transition: 300ms border;
 
-  :focus,
-  :not(:placeholder-shown) {
+  :focus {
     border-color: ${({ validationState }: InputProps) =>
       validationState === 'neutral' && '#422bd0'};
   }

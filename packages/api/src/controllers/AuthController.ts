@@ -19,11 +19,11 @@ class Controller {
     )
 
     if (!user) {
-      throw new HttpError(404, 'User not found')
+      throw new HttpError(400, 'INVALID_CREDENTIALS')
     }
 
     if (!(await bcrypt.compare(request.body.password, user.password as string))) {
-      throw new HttpError(400, 'Invalid password')
+      throw new HttpError(400, 'INVALID_CREDENTIALS')
     }
 
     response.status(201).send({ jwt: generateJwt(user) })

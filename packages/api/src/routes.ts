@@ -7,8 +7,10 @@ import { AuthorizationMiddleware } from '@/middlewares/AuthorizationMiddleware'
 
 import { UserValidators } from './validators/UserValidators'
 import { MessageValidators } from './validators/MessageValidators'
+import { AuthValidators } from './validators/AuthValidators'
 import { MessageController } from './controllers/MessageController'
 import { MessageHistoryController } from './controllers/MessageHistoryController'
+import { AuthController } from './controllers/AuthController'
 
 export const routes = Router()
 
@@ -24,6 +26,7 @@ routes.post(
 )
 
 routes.get('/users', validateInputs(UserValidators.index), UserController.index)
+routes.post('/users/auth', validateInputs(AuthValidators.store), AuthController.store)
 
 /**
  * /messages endpoint

@@ -1,5 +1,5 @@
+import { showErrorToast } from '@/toasts'
 import { ChangeEvent, Dispatch, SetStateAction } from 'react'
-import { toast } from 'react-toastify'
 
 import * as s from './styles'
 
@@ -14,12 +14,12 @@ export const ImageInput = ({ image, setImage }: Props) => {
     const file = event.target.files[0]
 
     if (file.type.split('/')[0] !== 'image') {
-      toast.error('That file is not an image')
+      showErrorToast('The selected file is not an image')
       return
     }
 
-    if (file.size > 0.1 * 1024 * 1024) {
-      toast.error('File size must be less than 2MB')
+    if (file.size > 2 * 1024 * 1024) {
+      showErrorToast('File size must be less than 2MB')
       return
     }
 
