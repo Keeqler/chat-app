@@ -1,13 +1,30 @@
 import styled from 'styled-components'
 
-export const Field = styled.div`
+export const Container = styled.div`
   width: 100%;
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
+  position: relative;
 `
 
-type InputProps = { validationState: 'neutral' | 'valid' | 'invalid' }
+export const Placeholder = styled.div`
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 16px;
+  color: #bbb;
+  pointer-events: none;
+  transition: opacity 100ms;
+`
+
+export const Icon = styled.img`
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+`
+
+type InputProps = { validationState?: 'neutral' | 'valid' | 'invalid'; hasIcon?: boolean }
 
 export const Input = styled.input`
   width: 100%;
@@ -17,14 +34,22 @@ export const Input = styled.input`
   color: #444;
   border: 2px solid
     ${({ validationState: vs }: InputProps) =>
-      vs === 'neutral' ? '#f4f4f4' : vs === 'valid' ? '#5fdfa3' : '#ff8484'};
+      vs === 'invalid' ? '#ff8484' : vs === 'valid' ? '#5fdfa3' : '#f4f4f4'};
   border-radius: 100px;
   background: #f4f4f4;
   transition: 300ms border;
 
+  ::placeholder {
+    opacity: 0;
+  }
+
   :focus {
     border-color: ${({ validationState }: InputProps) =>
       validationState === 'neutral' && '#422bd0'};
+  }
+
+  :not(:placeholder-shown) + ${Placeholder}, :focus + ${Placeholder} {
+    opacity: 0;
   }
 
   [type='textarea'] {
@@ -32,10 +57,4 @@ export const Input = styled.input`
     padding: 8px 12px;
     resize: none;
   }
-`
-
-export const ErrorMessage = styled.span`
-  margin-top: 4px;
-  font-size: 14px;
-  color: #ff8484;
 `

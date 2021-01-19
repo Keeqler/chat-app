@@ -32,12 +32,12 @@ export class createMessagesTable1609252680078 implements MigrationInterface {
           {
             name: 'createdAt',
             type: 'timestamp',
-            default: 'now()'
+            default: "strftime('%Y-%m-%dT%H:%M:%SZ')"
           },
           {
             name: 'updatedAt',
             type: 'timestamp',
-            default: 'now()'
+            default: "strftime('%Y-%m-%dT%H:%M:%SZ')"
           }
         ],
         foreignKeys: [

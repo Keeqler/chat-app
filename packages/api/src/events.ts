@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io'
-import { getRepository } from 'typeorm'
+import { getRepository, Like } from 'typeorm'
 import * as yup from 'yup'
 import jwt from 'jsonwebtoken'
 
@@ -13,17 +13,21 @@ export type MessagePayload = {
   message: string
 }
 
-type ConnectedSocket = {
-  socketId: string
-  userId: number
+type ConnectedSockets = {
+  [userId: number]: string
 }
 
-export const messagePayloadSchema = yup.object().shape({
+const messagePayloadSchema = yup.object().shape({
   to: yup.number().required().min(0),
   message: yup.string().required().max(1000)
 })
 
-let connectedSockets: ConnectedSocket[] = []
+const userSearchPayloadSchema = yup.object().shape({
+  username: yup.string().required(),
+  excludedUsernames: yup.array().of(yup.string())
+})
+
+const connectedSockets: ConnectedSockets = {}
 
 io.on('connection', async (socket: Socket) => {
   const token = (socket.handshake.auth as any).jwt
@@ -52,12 +56,36 @@ io.on('connection', async (socket: Socket) => {
     return
   }
 
-  connectedSockets.push({ socketId: socket.id, userId: user.id })
+  connectedSockets[user.id] = socket.id
 
   console.log('connected:', socket.id)
 
+  const messages = await messageRepository
+    .createQueryBuilder('messages')
+    .leftJoinAndSelect('messages.sender', 'sender')
+    .leftJoinAndSelect('messages.receiver', 'receiver')
+    .where('messages.senderId = :id OR messages.receiverId = :id', { id: user.id })
+    .orderBy('messages.id', 'DESC')
+    .getMany()
+
+  // probably, there's a way to make this more efficient
+
+  const chatHistory: Record<number, { user: User; lastMessage: Message }> = {}
+
+  for (const message of messages) {
+    const chatWith = message.receiver.id !== user.id ? message.receiver : message.sender
+
+    if (chatWith.id in chatHistory) {
+      continue
+    }
+
+    chatHistory[chatWith.id] = { user: chatWith, lastMessage: message }
+  }
+
+  socket.emit('chatHistory', chatHistory)
+
   socket.on('disconnect', () => {
-    connectedSockets = connectedSockets.filter(cs => cs.socketId !== socket.id)
+    delete connectedSockets[user.id]
 
     console.log('disconnected:', socket.id)
   })
@@ -66,7 +94,6 @@ io.on('connection', async (socket: Socket) => {
     try {
       await messagePayloadSchema.validate(payload)
     } catch {
-      console.log('invalid')
       return
     }
 
@@ -88,10 +115,28 @@ io.on('connection', async (socket: Socket) => {
 
     await messageRepository.save(message)
 
-    const receiverSocketId = connectedSockets.filter(cs => cs.userId === receiver.id)[0]?.socketId
+    const receiverSocketId = connectedSockets[receiver.id]
 
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('message', message)
     }
+  })
+
+  socket.on('userSearch', async (payload: { username: string; excludedUsernames: string[] }) => {
+    try {
+      await userSearchPayloadSchema.validate(payload)
+    } catch {
+      return
+    }
+
+    const users = await userRepository
+      .createQueryBuilder('user')
+      .where({ username: Like(`%${payload.username}%`) })
+      .andWhere('user.username NOT IN (:...excludedUsernames)', {
+        excludedUsernames: [...payload.excludedUsernames, user.username]
+      })
+      .getMany()
+
+    socket.emit('userSearch', users)
   })
 })

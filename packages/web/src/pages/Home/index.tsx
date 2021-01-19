@@ -5,7 +5,7 @@ import { OutlinedButton, StandardButton } from '@/components/Button'
 
 import * as s from './styles'
 
-export const Home = () => (
+export const HomePage = () => (
   <BoxLayout title="Hi there!">
     <s.Content>
       <s.Buttons>

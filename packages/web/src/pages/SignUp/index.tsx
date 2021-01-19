@@ -4,14 +4,14 @@ import * as yup from 'yup'
 import jwt from 'jsonwebtoken'
 
 import { BoxLayout } from '@/components/BoxLayout'
-import { Input } from '@/components/Input'
+import { FormInput } from '@/components/FormInput'
 import { Form } from '@/components/Form'
 import { FormSubmitButton } from '@/components/FormSubmitButton'
 import { FormMethodsGetter } from '@/components/FormMethodsGetter'
 import { showErrorToast, showSuccessToast } from '@/toasts'
 import { api } from '@/services/api'
 import { useAuth } from '@/store/auth'
-import { JwtPayload } from '@/types'
+import { User } from '@/types'
 
 import { ImageInput } from './components/ImageInput'
 import * as s from './styles'
@@ -34,7 +34,7 @@ const schema = yup.object().shape<Inputs>({
     .oneOf([yup.ref('password'), ''], 'Password confirmation does not match your password.')
 })
 
-export const SignUp = () => {
+export const SignUpPage = () => {
   const [image, setImage] = useState<File | null>(null)
   const [formMethods, setFormMethods] = useState<UseFormMethods<Inputs> | null>(null)
   const signIn = useAuth(state => state.signIn)
@@ -57,12 +57,12 @@ export const SignUp = () => {
       })
 
       const token = response.data.jwt
-      const decodedToken = jwt.decode(token) as JwtPayload
+      const decodedToken = jwt.decode(token) as User
 
       signIn(token, decodedToken)
       showSuccessToast('You have successfully signed up!')
     } catch (error) {
-      const errorCode = error?.response.data?.error as string | undefined
+      const errorCode = error?.response?.data?.error as string | undefined
 
       if (errorCode && errorCode === 'USERNAME_TAKEN') {
         formMethods.setError('username', {
@@ -86,9 +86,9 @@ export const SignUp = () => {
           <ImageInput image={image} setImage={setImage} />
 
           <s.Bottom>
-            <Input label="Username" name="username" isRequired />
-            <Input label="Password" name="password" type="password" isRequired />
-            <Input
+            <FormInput label="Username" name="username" isRequired />
+            <FormInput label="Password" name="password" type="password" isRequired />
+            <FormInput
               label="Password confirmation"
               name="passwordConfirmation"
               type="password"

@@ -3,13 +3,13 @@ import { UseFormMethods } from 'react-hook-form'
 import * as yup from 'yup'
 import jwt from 'jsonwebtoken'
 
-import { Input } from '@/components/Input'
+import { FormInput } from '@/components/FormInput'
 import { BoxLayout } from '@/components/BoxLayout'
 import { Form } from '@/components/Form'
 import { FormSubmitButton } from '@/components/FormSubmitButton'
 import { FormMethodsGetter } from '@/components/FormMethodsGetter'
 import { api } from '@/services/api'
-import { JwtPayload } from '@/types'
+import { User } from '@/types'
 import { showErrorToast, showSuccessToast } from '@/toasts'
 import { useAuth } from '@/store/auth'
 
@@ -23,7 +23,7 @@ const schema = yup.object().shape({
   password: yup.string().required('This field is required').min(6, 'Invalid password')
 })
 
-export const SignIn = () => {
+export const SignInPage = () => {
   const [formMethods, setFormMethods] = useState<UseFormMethods<Inputs> | null>(null)
   const signIn = useAuth(state => state.signIn)
 
@@ -34,12 +34,12 @@ export const SignIn = () => {
       const response = await api.post<SuccessResponse>('/users/auth', inputs)
 
       const token = response.data.jwt
-      const decodedToken = jwt.decode(token) as JwtPayload
+      const decodedToken = jwt.decode(token) as User
 
       signIn(token, decodedToken)
       showSuccessToast('You have successfully signed in!')
     } catch (error) {
-      const errorCode = error?.response.data?.error as string | undefined
+      const errorCode = error?.response?.data?.error as string | undefined
 
       if (errorCode && errorCode === 'INVALID_CREDENTIALS') {
         formMethods.setError('username', {
@@ -66,8 +66,8 @@ export const SignIn = () => {
         <Form onSubmit={handleSubmit} schema={schema}>
           <FormMethodsGetter setFormMethods={setFormMethods} />
 
-          <Input label="Username" name="username" isRequired />
-          <Input label="Password" name="password" type="password" isRequired />
+          <FormInput label="Username" name="username" isRequired />
+          <FormInput label="Password" name="password" type="password" isRequired />
           <FormSubmitButton>Start chatting now</FormSubmitButton>
         </Form>
       </s.Content>

@@ -8,13 +8,13 @@ import { GlobalStyle } from '@/components/GlobalStyle'
 import { ToastContainer } from '@/components/ToastContainer'
 
 import { Route } from './components/Route'
-import { Home } from './pages/Home'
-import { SignUp } from './pages/SignUp'
-import { SignIn } from './pages/SignIn'
-import { Chat } from './pages/Chat'
-import { NotFound } from './pages/404'
+import { HomePage } from './pages/Home'
+import { SignUpPage } from './pages/SignUp'
+import { SignInPage } from './pages/SignIn'
+import { ChatPage } from './pages/Chat'
+import { NotFoundPage } from './pages/404'
 import { useAuth } from './store/auth'
-import { JwtPayload } from './types'
+import { User } from './types'
 
 const App = () => {
   const authStore = useAuth(state => state)
@@ -26,7 +26,7 @@ const App = () => {
       const lsJwt = localStorage.getItem('jwt')
 
       if (lsJwt) {
-        const user = jwt.decode(lsJwt) as JwtPayload
+        const user = jwt.decode(lsJwt) as User
 
         authStore.signIn(lsJwt, user)
       }
@@ -40,11 +40,11 @@ const App = () => {
 
       <BrowserRouter>
         <Switch>
-          <Route component={Home} path="/" exact />
-          <Route component={SignUp} path="/signUp" />
-          <Route component={SignIn} path="/signIn" />
-          <Route component={Chat} path="/app" requiresAuth />
-          <Route component={NotFound} path="*" />
+          <Route component={HomePage} path="/" exact />
+          <Route component={SignUpPage} path="/signUp" />
+          <Route component={SignInPage} path="/signIn" />
+          <Route component={ChatPage} path="/app" requiresAuth />
+          <Route component={NotFoundPage} path="*" />
         </Switch>
       </BrowserRouter>
     </>

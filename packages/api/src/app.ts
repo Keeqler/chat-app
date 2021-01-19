@@ -18,4 +18,4 @@ app.use('/images', express.static(path.join(__dirname, '..', 'uploads')))
 app.use(errorHandler)
 
 export const httpServer = http.createServer(app)
-export const io = new socketIo.Server(httpServer, { cors: { origin: process.env.WEB_URL } })
+export const io = new socketIo.Server(httpServer, { cors: { origin } })

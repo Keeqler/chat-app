@@ -1,19 +1,23 @@
 import create from 'zustand'
 
-import { JwtPayload } from '@/types'
+import { User } from '@/types'
 
 type UseAuth = {
   jwt: string | null
-  user: JwtPayload | null
-  signIn: (jwt: string, user: JwtPayload) => void
+  user: User | null
+  signIn: (jwt: string, user: User) => void
+  signOut: () => void
 }
 
 export const useAuth = create<UseAuth>(set => ({
   jwt: null,
   user: null,
-  signIn: (jwt: string, user: JwtPayload) => {
+  signIn: (jwt: string, user: User) => {
     localStorage.setItem('jwt', jwt)
-
     set({ jwt, user })
+  },
+  signOut: () => {
+    localStorage.removeItem('jwt')
+    set({ jwt: null, user: null })
   }
 }))

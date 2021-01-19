@@ -48,14 +48,6 @@ class Controller {
 
     response.status(201).send({ jwt: generateJwt(user) })
   }
-
-  async index(request: Request<any, any, any, IndexReqQuery>, response: Response<IndexResBody>) {
-    const userRepository = getRepository(User)
-
-    const users = await userRepository.find({ username: Like(`%${request.query.query}%`) })
-
-    response.send(users)
-  }
 }
 
 export const UserController = new Controller()

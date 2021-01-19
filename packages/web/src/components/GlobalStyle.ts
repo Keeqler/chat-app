@@ -15,11 +15,13 @@ export const GlobalStyle = createGlobalStyle`
 
   body {
     font-size: 18px;
+    background: #422bd0;
   }
 
   #root {
     width: 100%;
     min-height: 100vh;
+    padding: 20px;
     display:flex;
     flex-direction:column;
   }

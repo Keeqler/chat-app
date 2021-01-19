@@ -9,7 +9,6 @@ import { UserValidators } from './validators/UserValidators'
 import { MessageValidators } from './validators/MessageValidators'
 import { AuthValidators } from './validators/AuthValidators'
 import { MessageController } from './controllers/MessageController'
-import { MessageHistoryController } from './controllers/MessageHistoryController'
 import { AuthController } from './controllers/AuthController'
 
 export const routes = Router()
@@ -25,7 +24,6 @@ routes.post(
   UserController.store
 )
 
-routes.get('/users', validateInputs(UserValidators.index), UserController.index)
 routes.post('/users/auth', validateInputs(AuthValidators.store), AuthController.store)
 
 /**
@@ -38,5 +36,3 @@ routes.get(
   validateInputs(MessageValidators.index),
   MessageController.index
 )
-
-routes.get('/messages/history', AuthorizationMiddleware, MessageHistoryController.index)
