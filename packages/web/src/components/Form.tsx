@@ -7,7 +7,7 @@ import { FormLoadingContext } from '@/contexts'
 import { useState } from 'react'
 
 type Props = {
-  onSubmit: (inputs: any) => Promise<void>
+  onSubmit: (inputs: any) => Promise<void> | void
   schema: ObjectSchema<Record<string, any> | undefined, Record<string, any>>
   defaultValues?: Record<string, any>
   style?: CSSProperties

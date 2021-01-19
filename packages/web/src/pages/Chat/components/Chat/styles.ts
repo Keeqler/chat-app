@@ -2,21 +2,17 @@ import styled from 'styled-components'
 
 export const Chat = styled.div`
   margin-left: 20px;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
   border-radius: 12px;
   border-top-right-radius: 140px;
   background: #fff;
 `
 
-export const Top = styled.div`
-  width: 100%;
-  height: 80px;
-  display: flex;
-`
-
 export const Recipient = styled.div`
+  width: 100%;
   margin: auto;
-  padding-bottom: 20px;
+  padding: 20px;
   position: relative;
   display: flex;
   flex-direction: row;
@@ -52,4 +48,14 @@ export const RecipientStatusCircle = styled.div`
   border-radius: 50%;
   background: ${({ status }: RecipientStatusProps) =>
     status === 'online' ? '#5FDFA3' : '#A7A7A7'};
+`
+
+export const Messages = styled.div`
+  width: 100%;
+  flex: 1;
+`
+
+export const MessageInputContainer = styled.div`
+  width: 100%;
+  padding: 10px;
 `

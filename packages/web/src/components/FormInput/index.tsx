@@ -1,4 +1,4 @@
-import { DetailedHTMLProps, InputHTMLAttributes } from 'react'
+import { CSSProperties, DetailedHTMLProps, InputHTMLAttributes } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import { InputLabel } from '@/components/InputLabel'
@@ -7,19 +7,31 @@ import * as s from './styles'
 
 type Props = DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> & {
   name: string
-  label: string
+  label?: string
+  errorDisplayDisabled?: boolean
   isRequired?: boolean
   isTextArea?: boolean
+  style?: CSSProperties
 }
 
-export const FormInput = ({ name, label, isRequired, isTextArea, ...props }: Props) => {
+export const FormInput = ({
+  name,
+  label,
+  errorDisplayDisabled,
+  isRequired,
+  isTextArea,
+  style,
+  ...props
+}: Props) => {
   const { register, errors, formState } = useFormContext()
 
   const valueIsValid = !errors[name]
   const fieldIsTouched = formState.touched[name]
   let validationState: 'neutral' | 'valid' | 'invalid'
 
-  if (valueIsValid && fieldIsTouched) {
+  if (errorDisplayDisabled) {
+    validationState = 'neutral'
+  } else if (valueIsValid && fieldIsTouched) {
     validationState = 'valid'
   } else if (!valueIsValid) {
     validationState = 'invalid'
@@ -28,10 +40,12 @@ export const FormInput = ({ name, label, isRequired, isTextArea, ...props }: Pro
   }
 
   return (
-    <s.Field>
-      <InputLabel>
-        {label} {isRequired && <span style={{ color: '#FF8484' }}>*</span>}
-      </InputLabel>
+    <s.Field style={style}>
+      {!!label && (
+        <InputLabel>
+          {label} {isRequired && <span style={{ color: '#FF8484' }}>*</span>}
+        </InputLabel>
+      )}
 
       <s.Input
         ref={register}
@@ -42,7 +56,9 @@ export const FormInput = ({ name, label, isRequired, isTextArea, ...props }: Pro
         {...(props as any)}
       />
 
-      {!!errors[name] && <s.ErrorMessage>{errors[name].message}</s.ErrorMessage>}
+      {!errorDisplayDisabled && !!errors[name] && (
+        <s.ErrorMessage>{errors[name].message}</s.ErrorMessage>
+      )}
     </s.Field>
   )
 }
