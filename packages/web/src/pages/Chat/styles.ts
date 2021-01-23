@@ -68,7 +68,7 @@ export const Chats = styled.div`
   background: #fff;
 `
 
-export const MessageBalloonIcon = styled.img.attrs({ src: 'assets/message-ballon.svg' })`
+export const MessageBalloonIcon = styled.img.attrs({ src: 'assets/message-ballon-purple.svg' })`
   width: 100%;
   max-width: 600px;
 `

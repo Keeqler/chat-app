@@ -1,22 +1,25 @@
-import { CSSProperties, DetailedHTMLProps, InputHTMLAttributes } from 'react'
+import { DetailedHTMLProps, InputHTMLAttributes } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import { InputLabel } from '@/components/InputLabel'
 
+import { Input } from '../Input'
 import * as s from './styles'
 
-type Props = DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> & {
+type Props = {
   name: string
   label?: string
+  icon?: string
   errorDisplayDisabled?: boolean
   isRequired?: boolean
   isTextArea?: boolean
-  style?: CSSProperties
-}
+} & DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>
 
 export const FormInput = ({
   name,
+  placeholder,
   label,
+  icon,
   errorDisplayDisabled,
   isRequired,
   isTextArea,
@@ -47,12 +50,13 @@ export const FormInput = ({
         </InputLabel>
       )}
 
-      <s.Input
-        ref={register}
-        type={isTextArea ? 'textarea' : 'text'}
+      <Input
         name={name}
-        placeholder=""
+        placeholder={placeholder}
+        icon={icon}
         validationState={validationState}
+        isTextArea={isTextArea}
+        ref={register}
         {...(props as any)}
       />
 

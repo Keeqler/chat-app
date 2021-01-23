@@ -8,18 +8,21 @@ import { Message } from './entities/Message'
 import { User } from './entities/User'
 import { JwtPayload } from './types'
 
-export type MessagePayload = {
-  to: number
-  message: string
-}
+type MessagePayload = { to: number; message: string }
+type MessageHistoryPayload = { userId: number }
+type UserSearchPayload = { username: string; excludedUsernames: string[] }
 
 type ConnectedSockets = {
   [userId: number]: string
 }
 
 const messagePayloadSchema = yup.object().shape({
-  to: yup.number().required().min(0),
+  to: yup.number().required().min(1),
   message: yup.string().required().max(1000)
+})
+
+const messageHistoryPayloadSchema = yup.object().shape({
+  userId: yup.number().required()
 })
 
 const userSearchPayloadSchema = yup.object().shape({
@@ -30,7 +33,7 @@ const userSearchPayloadSchema = yup.object().shape({
 const connectedSockets: ConnectedSockets = {}
 
 io.on('connection', async (socket: Socket) => {
-  const token = (socket.handshake.auth as any).jwt
+  const token = (socket.handshake.auth as { jwt: string }).jwt
 
   if (!token) {
     socket.disconnect()
@@ -68,7 +71,7 @@ io.on('connection', async (socket: Socket) => {
     .orderBy('messages.id', 'DESC')
     .getMany()
 
-  // probably, there's a way to make this more efficient
+  // TODO: probably, there's a way to make this more efficient
 
   const chatHistory: Record<number, { user: User; lastMessage: Message }> = {}
 
@@ -113,6 +116,8 @@ io.on('connection', async (socket: Socket) => {
       message: payload.message
     })
 
+    console.log(message)
+
     await messageRepository.save(message)
 
     const receiverSocketId = connectedSockets[receiver.id]
@@ -122,7 +127,29 @@ io.on('connection', async (socket: Socket) => {
     }
   })
 
-  socket.on('userSearch', async (payload: { username: string; excludedUsernames: string[] }) => {
+  socket.on('messageHistory', async (payload: MessageHistoryPayload) => {
+    try {
+      await messageHistoryPayloadSchema.validate(payload)
+    } catch {
+      return
+    }
+
+    const messages = await messageRepository.find({
+      where: [
+        { sender: user.id, receiver: payload.userId },
+        { sender: payload.userId, receiver: user.id }
+      ],
+      order: { createdAt: 'DESC' },
+      join: {
+        alias: 'message',
+        leftJoinAndSelect: { sender: 'message.sender', receiver: 'message.receiver' }
+      }
+    })
+
+    socket.emit('messageHistory', { userId: payload.userId, messages })
+  })
+
+  socket.on('userSearch', async (payload: UserSearchPayload) => {
     try {
       await userSearchPayloadSchema.validate(payload)
     } catch {

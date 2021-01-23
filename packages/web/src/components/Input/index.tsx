@@ -1,38 +1,36 @@
-import { DetailedHTMLProps, InputHTMLAttributes, RefObject } from 'react'
+import { DetailedHTMLProps, forwardRef, InputHTMLAttributes, TextareaHTMLAttributes } from 'react'
 
 import * as s from './styles'
 
-type Props = DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> & {
-  placeholder?: string
+type Props = {
   icon?: string
-  name?: string
-  validationState?: 'neutral' | 'valid' | 'invalid'
-  isRequired?: boolean
   isTextArea?: boolean
-  inputRef?: RefObject<HTMLInputElement>
-}
-
-export const Input = ({
-  placeholder,
-  icon,
-  name,
-  isTextArea,
-  validationState,
-  inputRef,
-  ...props
-}: Props) => (
-  <s.Container>
-    <s.Input
-      name={name}
-      type={isTextArea ? 'textarea' : 'text'}
-      placeholder="."
-      validationState={validationState}
-      ref={inputRef}
-      {...(props as any)}
-    />
-
-    <s.Placeholder>
-      {icon && <s.Icon src={icon} />} {placeholder}
-    </s.Placeholder>
-  </s.Container>
+  validationState?: 'neutral' | 'valid' | 'invalid'
+} & (
+  | DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>
+  | DetailedHTMLProps<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>
 )
+
+export const Input = forwardRef<HTMLInputElement, Props>(
+  ({ placeholder, icon, isTextArea, validationState, ...props }: Props, ref) => {
+    const InputComponent = isTextArea ? s.TextAreaInput : s.Input
+
+    return (
+      <s.Container>
+        <InputComponent
+          placeholder="."
+          validationState={validationState}
+          hasIcon={!!icon}
+          ref={ref}
+          {...(props as any)}
+        />
+
+        <s.Placeholder>
+          {icon && <s.Icon src={icon} />} <s.PlaceholderText>{placeholder}</s.PlaceholderText>
+        </s.Placeholder>
+      </s.Container>
+    )
+  }
+)
+
+Input.displayName = 'Input'

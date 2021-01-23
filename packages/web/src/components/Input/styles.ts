@@ -12,9 +12,12 @@ export const Placeholder = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  pointer-events: none;
+`
+
+export const PlaceholderText = styled.span`
   font-size: 16px;
   color: #bbb;
-  pointer-events: none;
   transition: opacity 100ms;
 `
 
@@ -30,6 +33,7 @@ export const Input = styled.input`
   width: 100%;
   height: 40px;
   padding: 0 14px;
+  padding-left: ${({ hasIcon }: InputProps) => (hasIcon ? '40px' : '14px')};
   font-size: 16px;
   color: #444;
   border: 2px solid
@@ -48,13 +52,17 @@ export const Input = styled.input`
       validationState === 'neutral' && '#422bd0'};
   }
 
-  :not(:placeholder-shown) + ${Placeholder}, :focus + ${Placeholder} {
+  :not(:placeholder-shown)
+    + ${Placeholder}
+    > ${PlaceholderText},
+    :focus
+    + ${Placeholder}
+    > ${PlaceholderText} {
     opacity: 0;
   }
+`
 
-  [type='textarea'] {
-    height: 216px;
-    padding: 8px 12px;
-    resize: none;
-  }
+export const TextAreaInput = styled(Input).attrs({ as: 'textarea' })`
+  padding-top: 9px;
+  resize: none;
 `

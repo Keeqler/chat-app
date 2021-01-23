@@ -41,7 +41,7 @@ export const UserSearch = ({ socket }: Props) => {
   function handleChatOpenerClick() {
     setSearchResult([])
 
-    if (inputRef && inputRef.current) {
+    if (inputRef.current) {
       inputRef.current.value = ''
     }
   }
@@ -62,7 +62,7 @@ export const UserSearch = ({ socket }: Props) => {
           placeholder="Search"
           icon="assets/search.svg"
           style={{ marginBottom: 10 }}
-          inputRef={inputRef}
+          ref={inputRef}
         />
 
         {hasResults && <UnderlinedTitle>Search results</UnderlinedTitle>}

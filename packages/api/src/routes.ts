@@ -3,12 +3,9 @@ import { Router } from 'express'
 import { UserController } from '@/controllers/UserController'
 import { processUpload } from '@/middlewares/UploadProcessMiddleware'
 import { validateInputs } from '@/middlewares/InputValidationMiddleware'
-import { AuthorizationMiddleware } from '@/middlewares/AuthorizationMiddleware'
 
 import { UserValidators } from './validators/UserValidators'
-import { MessageValidators } from './validators/MessageValidators'
 import { AuthValidators } from './validators/AuthValidators'
-import { MessageController } from './controllers/MessageController'
 import { AuthController } from './controllers/AuthController'
 
 export const routes = Router()
@@ -29,10 +26,3 @@ routes.post('/users/auth', validateInputs(AuthValidators.store), AuthController.
 /**
  * /messages endpoint
  */
-
-routes.get(
-  '/messages',
-  AuthorizationMiddleware,
-  validateInputs(MessageValidators.index),
-  MessageController.index
-)

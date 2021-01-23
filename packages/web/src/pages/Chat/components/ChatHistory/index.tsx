@@ -2,7 +2,7 @@ import { useEffect, useContext } from 'react'
 import { Socket } from 'socket.io-client'
 import * as datefns from 'date-fns'
 
-import { TChatHistory } from '@/types'
+import { Message, TChatHistory, User } from '@/types'
 
 import { ChatHistoryContext } from '../../contexts'
 import { ChatOpener } from '../ChatOpener'
@@ -13,6 +13,8 @@ type Props = {
   socket: Socket | null
 }
 
+type ChatHistoryPayload = Record<string, { user: User; lastMessage: Message | null }>
+
 export const ChatHistory = ({ socket }: Props) => {
   const [chatHistory, setChatHistory] = useContext(ChatHistoryContext)
   const chatHistoryArray = Object.values(chatHistory)
@@ -20,11 +22,11 @@ export const ChatHistory = ({ socket }: Props) => {
   useEffect(() => {
     if (!socket) return
 
-    socket.on('chatHistory', (payload: Omit<TChatHistory, 'messages'>) => {
+    socket.on('chatHistory', (payload: ChatHistoryPayload) => {
       const chatHistory: TChatHistory = {}
 
       Object.values(payload).forEach(chat => {
-        chatHistory[chat.user.id] = chat
+        chatHistory[chat.user.id] = { ...chat, messages: [] }
       })
 
       setChatHistory(chatHistory)

@@ -17,5 +17,9 @@ export type Message = {
 
 export type TChatHistory = Record<
   string,
-  { user: User; lastMessage: Message | null; messages: Message[] }
+  {
+    user: User
+    lastMessage: Message | null
+    messages: (Omit<Message, 'id'> & { id?: number })[]
+  }
 >

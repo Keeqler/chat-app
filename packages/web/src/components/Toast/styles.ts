@@ -21,7 +21,7 @@ export const Icon = styled.img`
 export const Content = styled.div`
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex-grow: 1;
 `
 
 export const Title = styled.span`

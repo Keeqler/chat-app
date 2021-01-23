@@ -1,17 +1,18 @@
 import styled from 'styled-components'
 
 export const Chat = styled.div`
+  max-height: calc(100vh - 40px);
   margin-left: 20px;
   display: flex;
   flex-direction: column;
   border-radius: 12px;
-  border-top-right-radius: 140px;
+  border-top-right-radius: 80px;
   background: #fff;
 `
 
 export const Recipient = styled.div`
   width: 100%;
-  margin: auto;
+  margin: 0 auto;
   padding: 20px;
   position: relative;
   display: flex;
@@ -50,12 +51,67 @@ export const RecipientStatusCircle = styled.div`
     status === 'online' ? '#5FDFA3' : '#A7A7A7'};
 `
 
-export const Messages = styled.div`
+export const MessagesFadeWrapper = styled.div`
   width: 100%;
-  flex: 1;
+  height: 0;
+  position: relative;
 `
 
-export const MessageInputContainer = styled.div`
+export const MessagesFade = styled.div`
+  width: 100%;
+  height: 40px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: linear-gradient(0deg, #00000000 0%, #fff 100%);
+  z-index: 1829471298478174;
+`
+
+export const Messages = styled.div`
   width: 100%;
   padding: 10px;
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  flex-grow: 1;
+  overflow-y: auto;
+
+  ::-webkit-scrollbar {
+    width: 40px;
+  }
+`
+
+type MessageProps = { incoming?: boolean }
+
+export const Message = styled.div`
+  max-width: 80%;
+  margin-bottom: 10px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: ${({ incoming }: MessageProps) => (incoming ? 'flex-start' : 'flex-end')};
+  align-self: ${({ incoming }: MessageProps) => (incoming ? 'flex-start' : 'flex-end')};
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: ${({ incoming }: MessageProps) => (incoming ? '#585858' : '#fff')};
+  background: ${({ incoming }: MessageProps) => (incoming ? '#ECECEC' : '#a294fc')};
+
+  span {
+    margin-top: 2px;
+    /* align-self: flex-end; */
+    font-size: 10px;
+    font-weight: 500;
+    color: ${({ incoming }: MessageProps) => (incoming ? '#A7A7A7' : ' #F1EFFF')};
+  }
+`
+
+export const FormContainer = styled.div`
+  width: 100%;
+  padding: 10px;
+`
+
+export const FormInner = styled.div`
+  display: flex;
+  flex-direction: row;
 `

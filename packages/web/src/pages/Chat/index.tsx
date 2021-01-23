@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { io, Socket } from 'socket.io-client'
 
 import { useAuth } from '@/store/auth'
-import { TChatHistory } from '@/types'
+import { Message, TChatHistory } from '@/types'
 
 import { Avatar } from './components/Avatar'
 import { ChatHistory } from './components/ChatHistory'
@@ -14,8 +14,8 @@ import * as s from './styles'
 
 export const ChatPage = () => {
   const [socket, setSocket] = useState<Socket | null>(null)
-  const chatHistoryState = useState<TChatHistory>({})
-  const chatOpenUserIdState = useState<number | null>(null)
+  const [chatHistory, setChatHistory] = useState<TChatHistory>({})
+  const [chatOpenUserId, setChatOpenUserId] = useState<number | null>(null)
   const authState = useAuth(state => state)
 
   useEffect(() => {
@@ -27,18 +27,37 @@ export const ChatPage = () => {
     setSocket(_socket)
 
     return () => {
-      if (_socket === null) return
+      if (!_socket) return
 
       _socket.close()
     }
   }, [])
 
+  useEffect(() => {
+    if (!socket) return
+
+    socket.on('message', (payload: Message) => {
+      setChatHistory(state => {
+        const chat = state[payload.sender.id] || {}
+
+        return {
+          ...state,
+          [payload.sender.id]: {
+            user: payload.sender,
+            messages: [payload, ...(chat.messages || [])],
+            lastMessage: payload
+          }
+        }
+      })
+    })
+  }, [socket])
+
   if (!socket) return <></>
 
   return (
     <s.Chat>
-      <ChatHistoryContext.Provider value={chatHistoryState}>
-        <ChatOpenUserIdContext.Provider value={chatOpenUserIdState}>
+      <ChatHistoryContext.Provider value={[chatHistory, setChatHistory]}>
+        <ChatOpenUserIdContext.Provider value={[chatOpenUserId, setChatOpenUserId]}>
           <s.LeftSideBar>
             <s.Profile>
               <s.ProfileMainContent>
@@ -59,7 +78,7 @@ export const ChatPage = () => {
             </s.Chats>
           </s.LeftSideBar>
 
-          <Chat />
+          <Chat socket={socket} />
         </ChatOpenUserIdContext.Provider>
       </ChatHistoryContext.Provider>
     </s.Chat>

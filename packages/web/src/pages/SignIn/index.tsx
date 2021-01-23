@@ -61,7 +61,7 @@ export const SignInPage = () => {
   return (
     <BoxLayout title="Sign in" subtitle="Start chatting now!">
       <s.Content>
-        <s.MessageBalloonIcon src="assets/message-balloon.svg" />
+        <s.MessageBalloonIcon src="assets/message-balloon-purple.svg" />
 
         <Form onSubmit={handleSubmit} schema={schema}>
           <FormMethodsGetter setFormMethods={setFormMethods} />
