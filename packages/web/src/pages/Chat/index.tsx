@@ -18,6 +18,8 @@ export const ChatPage = () => {
   const [chatOpenUserId, setChatOpenUserId] = useState<number | null>(null)
   const authState = useAuth(state => state)
 
+  console.log(chatHistory)
+
   useEffect(() => {
     const _socket = io(process.env.REACT_APP_API_URL, {
       auth: { jwt: authState.jwt },
@@ -43,11 +45,21 @@ export const ChatPage = () => {
         return {
           ...state,
           [payload.sender.id]: {
-            user: payload.sender,
+            ...state[payload.sender.id],
             messages: [payload, ...(chat.messages || [])],
             lastMessage: payload
           }
         }
+      })
+    })
+
+    socket.on('onlineStatus', (payload: { [userId: number]: boolean }) => {
+      setChatHistory(state => {
+        for (const userId of Object.keys(payload)) {
+          state[userId].online = payload[(userId as unknown) as number]
+        }
+
+        return { ...state }
       })
     })
   }, [socket])

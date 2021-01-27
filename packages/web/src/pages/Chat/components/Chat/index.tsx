@@ -33,12 +33,12 @@ export const Chat = ({ socket }: Props) => {
     }
 
     socket.on('messageHistory', (payload: { userId: number; messages: Message[] }) => {
-      console.log(payload)
       if (!payload.messages.length) return
 
       setChatHistory(state => ({
         ...state,
         [payload.userId]: {
+          ...state[payload.userId],
           user: state[payload.userId].user,
           lastMessage: payload.messages[0],
           messages: payload.messages

@@ -20,22 +20,17 @@ export const ChatOpener = ({ user, message, time, online, onClick }: Props) => {
   const [chatOpenUserId, setChatOpenUserId] = useContext(ChatOpenUserIdContext)
 
   function handleClick() {
+    console.log(onClick)
     if (onClick) {
       onClick()
     }
 
     if (!chatHistory[user.id]) {
-      setChatHistory(state => {
-        state[user.id] = { user, lastMessage: null, messages: [] }
-        return state
-      })
+      setChatHistory(state => ({ ...state, [user.id]: { user, lastMessage: null, messages: [] } }))
     }
 
     if (chatOpenUserId && !chatHistory[chatOpenUserId].lastMessage) {
-      setChatHistory(state => {
-        delete state[chatOpenUserId]
-        return state
-      })
+      setChatHistory(state => ({ ...state, [chatOpenUserId]: undefined }))
     }
 
     setChatOpenUserId(user.id)

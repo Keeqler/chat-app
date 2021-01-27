@@ -21,5 +21,6 @@ export type TChatHistory = Record<
     user: User
     lastMessage: Message | null
     messages: (Omit<Message, 'id'> & { id?: number })[]
+    online?: boolean
   }
 >

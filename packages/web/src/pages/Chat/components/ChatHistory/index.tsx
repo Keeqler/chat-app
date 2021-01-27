@@ -25,9 +25,9 @@ export const ChatHistory = ({ socket }: Props) => {
     socket.on('chatHistory', (payload: ChatHistoryPayload) => {
       const chatHistory: TChatHistory = {}
 
-      Object.values(payload).forEach(chat => {
-        chatHistory[chat.user.id] = { ...chat, messages: [] }
-      })
+      Object.values(payload).forEach(
+        chat => (chatHistory[chat.user.id] = { ...chat, messages: [] })
+      )
 
       setChatHistory(chatHistory)
     })
@@ -40,26 +40,31 @@ export const ChatHistory = ({ socket }: Props) => {
       )}
 
       <s.ChatOpeners>
-        {chatHistoryArray.map(chat => {
-          if (!chat.lastMessage) return
-
-          const creationDate = new Date(chat.lastMessage.createdAt)
-          let time = datefns.format(creationDate, 'dd/MM/yyyy')
-
-          if (datefns.isThisWeek(creationDate)) time = datefns.format(creationDate, 'EEEE')
-          if (datefns.isYesterday(creationDate)) time = 'Yesterday'
-          if (datefns.isToday(creationDate)) time = datefns.format(creationDate, 'HH:mm')
-
-          return (
-            <ChatOpener
-              key={chat.user.id}
-              user={chat.user}
-              message={chat.lastMessage.message}
-              time={time}
-              online
-            />
+        {chatHistoryArray
+          .filter(chat => !!chat.lastMessage)
+          .sort((a, b) =>
+            (a.lastMessage?.createdAt as string) < (b.lastMessage?.createdAt as string) ? 1 : -1
           )
-        })}
+          .map(chat => {
+            if (!chat.lastMessage) return
+
+            const creationDate = new Date(chat.lastMessage.createdAt)
+            let time = datefns.format(creationDate, 'dd/MM/yyyy')
+
+            if (datefns.isThisWeek(creationDate)) time = datefns.format(creationDate, 'EEEE')
+            if (datefns.isYesterday(creationDate)) time = 'Yesterday'
+            if (datefns.isToday(creationDate)) time = datefns.format(creationDate, 'HH:mm')
+
+            return (
+              <ChatOpener
+                key={chat.user.id}
+                user={chat.user}
+                message={chat.lastMessage.message}
+                online={chat.online}
+                time={time}
+              />
+            )
+          })}
       </s.ChatOpeners>
     </>
   )

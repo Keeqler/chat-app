@@ -61,7 +61,7 @@ io.on('connection', async (socket: Socket) => {
 
   connectedSockets[user.id] = socket.id
 
-  console.log('connected:', socket.id)
+  socket.broadcast.emit('onlineStatus', { [user.id]: true })
 
   const messages = await messageRepository
     .createQueryBuilder('messages')
@@ -74,23 +74,24 @@ io.on('connection', async (socket: Socket) => {
   // TODO: probably, there's a way to make this more efficient
 
   const chatHistory: Record<number, { user: User; lastMessage: Message }> = {}
+  const onlineStatus: { [userId: number]: boolean } = {}
 
   for (const message of messages) {
-    const chatWith = message.receiver.id !== user.id ? message.receiver : message.sender
+    const chatUser = message.receiver.id !== user.id ? message.receiver : message.sender
 
-    if (chatWith.id in chatHistory) {
-      continue
+    if (!(chatUser.id in chatHistory)) {
+      chatHistory[chatUser.id] = { user: chatUser, lastMessage: message }
+      onlineStatus[chatUser.id] = chatUser.id in connectedSockets
     }
-
-    chatHistory[chatWith.id] = { user: chatWith, lastMessage: message }
   }
 
   socket.emit('chatHistory', chatHistory)
+  socket.emit('onlineStatus', onlineStatus)
 
   socket.on('disconnect', () => {
     delete connectedSockets[user.id]
 
-    console.log('disconnected:', socket.id)
+    socket.broadcast.emit('onlineStatus', { [user.id]: false })
   })
 
   socket.on('message', async (payload: MessagePayload) => {
@@ -115,8 +116,6 @@ io.on('connection', async (socket: Socket) => {
       receiver,
       message: payload.message
     })
-
-    console.log(message)
 
     await messageRepository.save(message)
 
@@ -165,5 +164,9 @@ io.on('connection', async (socket: Socket) => {
       .getMany()
 
     socket.emit('userSearch', users)
+  })
+
+  socket.on('onlineStatus', async (userId: number) => {
+    socket.emit('onlineStatus', { [userId]: userId in connectedSockets })
   })
 })
