@@ -11,7 +11,12 @@ import { StandardButton } from '@/components/Button'
 import { useAuth } from '@/store/auth'
 import { Message, User } from '@/types'
 
-import { ChatHistoryContext, ChatOpenUserIdContext } from '../../contexts'
+import {
+  ChatOpenUserIdContext,
+  MessagesContext,
+  OnlineStatusesContext,
+  UsersContext
+} from '../../contexts'
 import { Avatar } from '../Avatar'
 import { Username } from '../Username'
 import * as s from './styles'
@@ -22,28 +27,21 @@ const schema = yup.object().shape({ message: yup.string().min(1) })
 
 export const Chat = ({ socket }: Props) => {
   const user = useAuth(state => state.user)
-  const [chatHistory, setChatHistory] = useContext(ChatHistoryContext)
+  const [users] = useContext(UsersContext)
+  const [messages, setMessages] = useContext(MessagesContext)
+  const [onlineStatuses] = useContext(OnlineStatusesContext)
   const [chatOpenUserId] = useContext(ChatOpenUserIdContext)
   const [formMethods, setFormMethods] = useState<UseFormMethods | null>(null)
   const submitButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    if (chatOpenUserId) {
+    if (chatOpenUserId && messages[chatOpenUserId] && messages[chatOpenUserId].length < 3) {
       socket.emit('messageHistory', { userId: chatOpenUserId })
+      socket.emit('onlineStatus', chatOpenUserId)
     }
 
-    socket.on('messageHistory', (payload: { userId: number; messages: Message[] }) => {
-      if (!payload.messages.length) return
-
-      setChatHistory(state => ({
-        ...state,
-        [payload.userId]: {
-          ...state[payload.userId],
-          user: state[payload.userId].user,
-          lastMessage: payload.messages[0],
-          messages: payload.messages
-        }
-      }))
+    socket.on('messageHistory', (messageHistory: { userId: number; messages: Message[] }) => {
+      setMessages(state => ({ ...state, [messageHistory.userId]: messageHistory.messages }))
     })
 
     return () => {
@@ -53,13 +51,15 @@ export const Chat = ({ socket }: Props) => {
 
   if (!chatOpenUserId || !user) return <></>
 
-  const chatOpenUser = chatHistory[chatOpenUserId].user
-  const messages = chatHistory[chatOpenUserId].messages
+  const chatOpenUser = users[chatOpenUserId]
+  const chatOpenUserIsOnline = onlineStatuses[chatOpenUserId]
+  const messageHistory = messages[chatOpenUserId] || []
 
   function handleSubmit(inputs: { message: string }) {
     socket.emit('message', { to: chatOpenUserId, message: inputs.message })
 
     const message = {
+      id: Math.random(), // generating a random ID as we don't need the actual one
       message: inputs.message,
       receiver: chatOpenUser,
       sender: user as User,
@@ -67,14 +67,7 @@ export const Chat = ({ socket }: Props) => {
       updatedAt: new Date().toISOString()
     }
 
-    setChatHistory(state => ({
-      ...state,
-      [chatOpenUserId as number]: {
-        ...state[chatOpenUserId as number],
-        lastMessage: message,
-        messages: [message, ...state[chatOpenUserId as number].messages]
-      }
-    }))
+    setMessages(state => ({ ...state, [chatOpenUserId]: [message, ...state[chatOpenUserId]] }))
 
     formMethods?.reset()
   }
@@ -94,8 +87,9 @@ export const Chat = ({ socket }: Props) => {
         <s.RecipientRight>
           <Username>{chatOpenUser.username}</Username>
 
-          <s.RecipientStatus status="online">
-            <s.RecipientStatusCircle status="online" /> Online
+          <s.RecipientStatus status={chatOpenUserIsOnline ? 'online' : 'offline'}>
+            <s.RecipientStatusCircle status={chatOpenUserIsOnline ? 'online' : 'offline'} />{' '}
+            {chatOpenUserIsOnline ? 'Online' : 'Offline'}
           </s.RecipientStatus>
         </s.RecipientRight>
       </s.Recipient>
@@ -105,13 +99,12 @@ export const Chat = ({ socket }: Props) => {
       </s.MessagesFadeWrapper>
 
       <s.Messages>
-        {!!messages &&
-          messages.map(message => (
-            <s.Message key={Math.random()} incoming={message.sender.id === chatOpenUserId}>
-              {message.message}
-              <span>{datefns.formatRelative(new Date(message.createdAt), new Date())}</span>
-            </s.Message>
-          ))}
+        {messageHistory.map(message => (
+          <s.Message key={Math.random()} incoming={message.sender.id === chatOpenUserId}>
+            {message.message}
+            <span>{datefns.formatRelative(new Date(message.createdAt), new Date())}</span>
+          </s.Message>
+        ))}
       </s.Messages>
 
       <s.FormContainer>

@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 
-import { ChatHistoryContext, ChatOpenUserIdContext } from '@/pages/Chat/contexts'
+import { ChatOpenUserIdContext } from '@/pages/Chat/contexts'
 import { User } from '@/types'
 
 import { Avatar } from '../Avatar'
@@ -12,27 +12,14 @@ type Props = {
   message?: string
   time?: string
   online?: boolean
-  onClick?: () => void
+  onClick?: (user: User) => void
 }
 
 export const ChatOpener = ({ user, message, time, online, onClick }: Props) => {
-  const [chatHistory, setChatHistory] = useContext(ChatHistoryContext)
-  const [chatOpenUserId, setChatOpenUserId] = useContext(ChatOpenUserIdContext)
+  const [, setChatOpenUserId] = useContext(ChatOpenUserIdContext)
 
   function handleClick() {
-    console.log(onClick)
-    if (onClick) {
-      onClick()
-    }
-
-    if (!chatHistory[user.id]) {
-      setChatHistory(state => ({ ...state, [user.id]: { user, lastMessage: null, messages: [] } }))
-    }
-
-    if (chatOpenUserId && !chatHistory[chatOpenUserId].lastMessage) {
-      setChatHistory(state => ({ ...state, [chatOpenUserId]: undefined }))
-    }
-
+    if (onClick) onClick(user)
     setChatOpenUserId(user.id)
   }
 

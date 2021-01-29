@@ -1,14 +1,17 @@
 import { createContext, Dispatch, SetStateAction } from 'react'
 
-import { TChatHistory } from '@/types'
+import { ChatOpenUserIdState, MessagesState, OnlineStatusesState, UsersState } from '@/types'
 
-type TChatHistoryContext = [TChatHistory, Dispatch<SetStateAction<TChatHistory>>]
-type TChatOpenUserIdContext = [number | null, Dispatch<SetStateAction<number | null>>]
+type TUsersContext = [UsersState, Dispatch<SetStateAction<UsersState>>]
+type TMessagesContext = [MessagesState, Dispatch<SetStateAction<MessagesState>>]
+type TOnlineStatusesContext = [OnlineStatusesState, Dispatch<SetStateAction<OnlineStatusesState>>]
+type TChatOpenUserIdContext = [ChatOpenUserIdState, Dispatch<SetStateAction<ChatOpenUserIdState>>]
 
-export const ChatHistoryContext = createContext<TChatHistoryContext>(
-  (null as unknown) as TChatHistoryContext
+export const UsersContext = createContext<TUsersContext>({} as TUsersContext)
+export const MessagesContext = createContext<TMessagesContext>({} as TMessagesContext)
+export const OnlineStatusesContext = createContext<TOnlineStatusesContext>(
+  {} as TOnlineStatusesContext
 )
-
 export const ChatOpenUserIdContext = createContext<TChatOpenUserIdContext>(
-  (null as unknown) as TChatOpenUserIdContext
+  {} as TChatOpenUserIdContext
 )

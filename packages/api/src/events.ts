@@ -73,7 +73,7 @@ io.on('connection', async (socket: Socket) => {
 
   // TODO: probably, there's a way to make this more efficient
 
-  const chatHistory: Record<number, { user: User; lastMessage: Message }> = {}
+  const chatHistory: { [userId: number]: { user: User; lastMessage: Message } } = {}
   const onlineStatus: { [userId: number]: boolean } = {}
 
   for (const message of messages) {
@@ -85,7 +85,7 @@ io.on('connection', async (socket: Socket) => {
     }
   }
 
-  socket.emit('chatHistory', chatHistory)
+  socket.emit('chatHistory', Object.values(chatHistory))
   socket.emit('onlineStatus', onlineStatus)
 
   socket.on('disconnect', () => {

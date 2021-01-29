@@ -15,12 +15,7 @@ export type Message = {
   updatedAt: string
 }
 
-export type TChatHistory = Record<
-  string,
-  {
-    user: User
-    lastMessage: Message | null
-    messages: (Omit<Message, 'id'> & { id?: number })[]
-    online?: boolean
-  }
->
+export type UsersState = { [userId: number]: User }
+export type MessagesState = { [userId: number]: Message[] }
+export type OnlineStatusesState = { [userId: number]: boolean }
+export type ChatOpenUserIdState = number

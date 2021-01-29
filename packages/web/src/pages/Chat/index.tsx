@@ -2,23 +2,28 @@ import { useState, useEffect } from 'react'
 import { io, Socket } from 'socket.io-client'
 
 import { useAuth } from '@/store/auth'
-import { Message, TChatHistory } from '@/types'
+import { Message, User } from '@/types'
 
 import { Avatar } from './components/Avatar'
 import { ChatHistory } from './components/ChatHistory'
 import { UserSearch } from './components/UserSearch'
 import { Chat } from './components/Chat'
 import { Username } from './components/Username'
-import { ChatHistoryContext, ChatOpenUserIdContext } from './contexts'
+import {
+  UsersContext,
+  MessagesContext,
+  OnlineStatusesContext,
+  ChatOpenUserIdContext
+} from './contexts'
 import * as s from './styles'
 
 export const ChatPage = () => {
   const [socket, setSocket] = useState<Socket | null>(null)
-  const [chatHistory, setChatHistory] = useState<TChatHistory>({})
-  const [chatOpenUserId, setChatOpenUserId] = useState<number | null>(null)
+  const [users, setUsers] = useState<{ [userId: number]: User }>({})
+  const [messages, setMessages] = useState<{ [userId: number]: Message[] }>({})
+  const [onlineStatuses, setOnlineStatuses] = useState<{ [userId: number]: boolean }>({})
+  const [chatOpenUserId, setChatOpenUserId] = useState<number>(0)
   const authState = useAuth(state => state)
-
-  console.log(chatHistory)
 
   useEffect(() => {
     const _socket = io(process.env.REACT_APP_API_URL, {
@@ -38,61 +43,64 @@ export const ChatPage = () => {
   useEffect(() => {
     if (!socket) return
 
-    socket.on('message', (payload: Message) => {
-      setChatHistory(state => {
-        const chat = state[payload.sender.id] || {}
+    socket.on('message', (message: Message) => {
+      const senderId = message.sender.id
 
-        return {
-          ...state,
-          [payload.sender.id]: {
-            ...state[payload.sender.id],
-            messages: [payload, ...(chat.messages || [])],
-            lastMessage: payload
-          }
-        }
-      })
+      if (!users[senderId]) {
+        setUsers(state => ({ ...state, [senderId]: message.sender }))
+      }
+
+      if (!messages[senderId]) {
+        setMessages(state => ({ ...state, [senderId]: [message] }))
+        return
+      }
+
+      setMessages(state => ({ ...state, [senderId]: [message, ...state[senderId]] }))
     })
 
-    socket.on('onlineStatus', (payload: { [userId: number]: boolean }) => {
-      setChatHistory(state => {
-        for (const userId of Object.keys(payload)) {
-          state[userId].online = payload[(userId as unknown) as number]
-        }
-
-        return { ...state }
-      })
+    socket.on('onlineStatus', (onlineStatuses: { [userId: number]: boolean }) => {
+      setOnlineStatuses(state => ({ ...state, ...onlineStatuses }))
     })
-  }, [socket])
+
+    return () => {
+      socket.off('message')
+      socket.off('onlineStatus')
+    }
+  }, [socket, messages])
 
   if (!socket) return <></>
 
   return (
     <s.Chat>
-      <ChatHistoryContext.Provider value={[chatHistory, setChatHistory]}>
-        <ChatOpenUserIdContext.Provider value={[chatOpenUserId, setChatOpenUserId]}>
-          <s.LeftSideBar>
-            <s.Profile>
-              <s.ProfileMainContent>
-                <Avatar image={authState.user?.avatar} online />
+      <UsersContext.Provider value={[users, setUsers]}>
+        <MessagesContext.Provider value={[messages, setMessages]}>
+          <OnlineStatusesContext.Provider value={[onlineStatuses, setOnlineStatuses]}>
+            <ChatOpenUserIdContext.Provider value={[chatOpenUserId, setChatOpenUserId]}>
+              <s.LeftSideBar>
+                <s.Profile>
+                  <s.ProfileMainContent>
+                    <Avatar image={authState.user?.avatar} online />
 
-                <s.Welcome>
-                  <s.WelcomeText>Welcome back,</s.WelcomeText>
-                  <Username>{authState.user?.username}</Username>
-                </s.Welcome>
-              </s.ProfileMainContent>
+                    <s.Welcome>
+                      <s.WelcomeText>Welcome back,</s.WelcomeText>
+                      <Username>{authState.user?.username}</Username>
+                    </s.Welcome>
+                  </s.ProfileMainContent>
 
-              <s.SignOutButton onClick={authState.signOut}>Sign out</s.SignOutButton>
-            </s.Profile>
+                  <s.SignOutButton onClick={authState.signOut}>Sign out</s.SignOutButton>
+                </s.Profile>
 
-            <s.Chats>
-              <UserSearch socket={socket} />
-              <ChatHistory socket={socket} />
-            </s.Chats>
-          </s.LeftSideBar>
+                <s.Chats>
+                  <UserSearch socket={socket} />
+                  <ChatHistory socket={socket} />
+                </s.Chats>
+              </s.LeftSideBar>
 
-          <Chat socket={socket} />
-        </ChatOpenUserIdContext.Provider>
-      </ChatHistoryContext.Provider>
+              <Chat socket={socket} />
+            </ChatOpenUserIdContext.Provider>
+          </OnlineStatusesContext.Provider>
+        </MessagesContext.Provider>
+      </UsersContext.Provider>
     </s.Chat>
   )
 }

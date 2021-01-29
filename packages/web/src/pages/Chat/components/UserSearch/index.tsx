@@ -6,18 +6,26 @@ import { User } from '@/types'
 
 import { ChatOpener } from '../ChatOpener'
 import { UnderlinedTitle } from '../UnderlinedTitle'
-import { ChatHistoryContext } from '../../contexts'
+import { UsersContext } from '../../contexts'
 import * as s from './styles'
 
 type Props = { socket: Socket | null }
 
 export const UserSearch = ({ socket }: Props) => {
-  const [chatHistory] = useContext(ChatHistoryContext)
+  const [users, setUsers] = useContext(UsersContext)
   const [searchResult, setSearchResult] = useState<User[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
 
   const hasResults = searchResult.length > 0
   let lastTimeout = 0
+
+  useEffect(() => {
+    if (!socket) return
+
+    socket.on('userSearch', (payload: User[]) => {
+      setSearchResult(payload)
+    })
+  }, [])
 
   function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
     if (!socket) return
@@ -33,26 +41,19 @@ export const UserSearch = ({ socket }: Props) => {
     lastTimeout = (setTimeout(() => {
       socket.emit('userSearch', {
         username: search,
-        excludedUsernames: Object.values(chatHistory).map(chat => chat.user.username)
+        excludedUsernames: Object.values(users).map(user => user.username)
       })
     }, 1000) as unknown) as number
   }
 
-  function handleChatOpenerClick() {
+  function handleChatOpenerClick(user: User) {
+    setUsers(state => ({ ...state, [user.id]: user }))
     setSearchResult([])
 
     if (inputRef.current) {
       inputRef.current.value = ''
     }
   }
-
-  useEffect(() => {
-    if (!socket) return
-
-    socket.on('userSearch', (payload: User[]) => {
-      setSearchResult(payload)
-    })
-  }, [])
 
   return (
     <s.UserSearch hasResults={hasResults}>
