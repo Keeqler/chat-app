@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { HorizontalSeparator } from '../HorizontalSeparator'
 
-export const HistoryChat = styled.div`
+export const ChatOpener = styled.div`
   width: 100%;
   height: 72px;
   padding: 0 10px;
@@ -13,6 +13,11 @@ export const HistoryChat = styled.div`
   :hover {
     height: 92px;
     background: #f8f9ff;
+  }
+
+  :hover,
+  :last-child {
+    border-radius: 12px;
   }
 `
 
@@ -51,6 +56,10 @@ export const NameAndLastMessage = styled.div`
 export const LastMessage = styled.span`
   font-size: 14px;
   color: #a7a7a7;
+
+  strong {
+    color: #a7a7a7;
+  }
 `
 
 export const Time = styled.span`
@@ -61,7 +70,7 @@ export const Time = styled.span`
 `
 
 export const BottomBorder = styled(HorizontalSeparator)`
-  ${HistoryChat}:last-child > & {
+  ${ChatOpener}:last-child > & {
     display: none;
   }
 `

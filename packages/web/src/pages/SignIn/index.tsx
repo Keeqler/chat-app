@@ -19,8 +19,12 @@ type Inputs = { username: string; password: string }
 type SuccessResponse = { jwt: string }
 
 const schema = yup.object().shape({
-  username: yup.string().required('This field is required').max(40, 'Invalid username'),
-  password: yup.string().required('This field is required').min(6, 'Invalid password')
+  username: yup
+    .string()
+    .required('This field is required.')
+    .max(40, 'Invalid username.')
+    .matches(/^[A-Za-z0-9_-]*$/, 'Invalid username.'),
+  password: yup.string().required('This field is required.').min(6, 'Invalid password.')
 })
 
 export const SignInPage = () => {

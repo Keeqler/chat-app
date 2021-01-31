@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { io, Socket } from 'socket.io-client'
+import { CSSTransition } from 'react-transition-group'
 
 import { useAuth } from '@/store/auth'
 import { Message, User } from '@/types'
@@ -9,12 +10,7 @@ import { ChatHistory } from './components/ChatHistory'
 import { UserSearch } from './components/UserSearch'
 import { Chat } from './components/Chat'
 import { Username } from './components/Username'
-import {
-  UsersContext,
-  MessagesContext,
-  OnlineStatusesContext,
-  ChatOpenUserIdContext
-} from './contexts'
+import { ChatContext, TChatContext } from './contexts'
 import * as s from './styles'
 
 export const ChatPage = () => {
@@ -23,7 +19,16 @@ export const ChatPage = () => {
   const [messages, setMessages] = useState<{ [userId: number]: Message[] }>({})
   const [onlineStatuses, setOnlineStatuses] = useState<{ [userId: number]: boolean }>({})
   const [chatOpenUserId, setChatOpenUserId] = useState<number>(0)
+  const [chatOpenMobile, setChatOpenMobile] = useState<boolean>(false)
   const authState = useAuth(state => state)
+
+  const contextProviderValue: TChatContext = {
+    usersState: [users, setUsers],
+    messagesState: [messages, setMessages],
+    onlineStatusesState: [onlineStatuses, setOnlineStatuses],
+    chatOpenUserIdState: [chatOpenUserId, setChatOpenUserId],
+    chatOpenMobileState: [chatOpenMobile, setChatOpenMobile]
+  }
 
   useEffect(() => {
     const _socket = io(process.env.REACT_APP_API_URL, {
@@ -72,35 +77,52 @@ export const ChatPage = () => {
 
   return (
     <s.Chat>
-      <UsersContext.Provider value={[users, setUsers]}>
-        <MessagesContext.Provider value={[messages, setMessages]}>
-          <OnlineStatusesContext.Provider value={[onlineStatuses, setOnlineStatuses]}>
-            <ChatOpenUserIdContext.Provider value={[chatOpenUserId, setChatOpenUserId]}>
-              <s.LeftSideBar>
-                <s.Profile>
-                  <s.ProfileMainContent>
-                    <Avatar image={authState.user?.avatar} online />
+      <ChatContext.Provider value={contextProviderValue}>
+        <CSSTransition
+          in={
+            (!chatOpenMobile && window.screen.availWidth <= 940) || window.screen.availWidth > 940
+          }
+          classNames="leftSideBar"
+          timeout={400}
+          unmountOnExit
+        >
+          <s.LeftSideBar>
+            <s.Profile>
+              <s.ProfileMainContent>
+                <Avatar image={authState.user?.avatar} online />
 
-                    <s.Welcome>
-                      <s.WelcomeText>Welcome back,</s.WelcomeText>
-                      <Username>{authState.user?.username}</Username>
-                    </s.Welcome>
-                  </s.ProfileMainContent>
+                <s.Welcome>
+                  <s.WelcomeText>Welcome back,</s.WelcomeText>
+                  <Username>{authState.user?.username}</Username>
+                </s.Welcome>
+              </s.ProfileMainContent>
 
-                  <s.SignOutButton onClick={authState.signOut}>Sign out</s.SignOutButton>
-                </s.Profile>
+              <s.SignOutButton onClick={authState.signOut}>Sign out</s.SignOutButton>
+            </s.Profile>
 
-                <s.Chats>
-                  <UserSearch socket={socket} />
-                  <ChatHistory socket={socket} />
-                </s.Chats>
-              </s.LeftSideBar>
+            <s.Chats>
+              <UserSearch socket={socket} />
+              <ChatHistory socket={socket} />
 
-              <Chat socket={socket} />
-            </ChatOpenUserIdContext.Provider>
-          </OnlineStatusesContext.Provider>
-        </MessagesContext.Provider>
-      </UsersContext.Provider>
+              {!Object.keys(messages).length && (
+                <s.NoConversations>
+                  <strong>You had no conversations yet</strong>
+                  Use the search box above and find someone to chat!
+                </s.NoConversations>
+              )}
+            </s.Chats>
+          </s.LeftSideBar>
+        </CSSTransition>
+
+        <CSSTransition
+          in={(chatOpenMobile && window.screen.availWidth <= 940) || window.screen.availWidth > 940}
+          classNames="chat"
+          timeout={400}
+          unmountOnExit
+        >
+          <Chat socket={socket} />
+        </CSSTransition>
+      </ChatContext.Provider>
     </s.Chat>
   )
 }

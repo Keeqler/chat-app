@@ -23,7 +23,11 @@ const schema = yup.object().shape<Inputs>({
   username: yup
     .string()
     .required('This field is required.')
-    .max(40, 'Username must be shorter or equal to 40 characters.'),
+    .max(40, 'Username must be shorter or equal to 40 characters.')
+    .matches(
+      /^[A-Za-z0-9_-]*$/,
+      'Username must contain only letters, numbers, dashes and underscores.'
+    ),
   password: yup
     .string()
     .required('This field is required.')

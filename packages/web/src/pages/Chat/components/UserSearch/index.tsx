@@ -6,13 +6,14 @@ import { User } from '@/types'
 
 import { ChatOpener } from '../ChatOpener'
 import { UnderlinedTitle } from '../UnderlinedTitle'
-import { UsersContext } from '../../contexts'
+import { ChatContext } from '../../contexts'
 import * as s from './styles'
 
 type Props = { socket: Socket | null }
 
 export const UserSearch = ({ socket }: Props) => {
-  const [users, setUsers] = useContext(UsersContext)
+  const chatContext = useContext(ChatContext)
+  const [users, setUsers] = chatContext.usersState
   const [searchResult, setSearchResult] = useState<User[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
 

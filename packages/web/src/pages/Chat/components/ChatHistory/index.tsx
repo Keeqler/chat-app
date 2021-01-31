@@ -1,10 +1,9 @@
 import { useEffect, useContext } from 'react'
 import { Socket } from 'socket.io-client'
-import * as datefns from 'date-fns'
 
 import { Message, User, UsersState, MessagesState } from '@/types'
 
-import { UsersContext, MessagesContext, OnlineStatusesContext } from '../../contexts'
+import { ChatContext } from '../../contexts'
 import { ChatOpener } from '../ChatOpener'
 import { UnderlinedTitle } from '../UnderlinedTitle'
 import * as s from './styles'
@@ -16,9 +15,9 @@ type Props = {
 type ChatHistoryPayload = { user: User; lastMessage: Message | null }[]
 
 export const ChatHistory = ({ socket }: Props) => {
-  const [users, setUsers] = useContext(UsersContext)
-  const [messages, setMessages] = useContext(MessagesContext)
-  const [onlineStatuses] = useContext(OnlineStatusesContext)
+  const chatContext = useContext(ChatContext)
+  const [users, setUsers] = chatContext.usersState
+  const [messages, setMessages] = chatContext.messagesState
 
   useEffect(() => {
     if (!socket) return
@@ -52,26 +51,12 @@ export const ChatHistory = ({ socket }: Props) => {
       )}
 
       <s.ChatOpeners>
-        {chatHistory.map(chat => {
-          if (!chat.lastMessage) return
-
-          const creationDate = new Date(chat.lastMessage.createdAt)
-          let time = datefns.format(creationDate, 'dd/MM/yyyy')
-
-          if (datefns.isThisWeek(creationDate)) time = datefns.format(creationDate, 'EEEE')
-          if (datefns.isYesterday(creationDate)) time = 'Yesterday'
-          if (datefns.isToday(creationDate)) time = datefns.format(creationDate, 'HH:mm')
-
-          return (
-            <ChatOpener
-              key={chat.user.id}
-              user={chat.user}
-              message={chat.lastMessage.message}
-              online={onlineStatuses[chat.user.id]}
-              time={time}
-            />
-          )
-        })}
+        {chatHistory.map(
+          chat =>
+            !!chat.lastMessage && (
+              <ChatOpener key={chat.user.id} user={chat.user} lastMessage={chat.lastMessage} />
+            )
+        )}
       </s.ChatOpeners>
     </>
   )

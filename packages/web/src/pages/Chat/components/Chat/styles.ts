@@ -3,11 +3,37 @@ import styled from 'styled-components'
 export const Chat = styled.div`
   max-height: calc(100vh - 40px);
   margin-left: 20px;
+  position: relative;
   display: flex;
+  flex-grow: 1;
   flex-direction: column;
   border-radius: 12px;
   border-top-right-radius: 80px;
   background: #fff;
+
+  @media screen and (max-width: 940px) {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-left: 0;
+  }
+`
+
+export const GoBackButton = styled.button.attrs({ type: 'button' })`
+  width: 30px;
+  height: 25.9px;
+  position: absolute;
+  top: 31px;
+  left: 31px;
+  background-size: cover;
+  background-image: url('assets/go-back.svg');
+  z-index: 1293857923;
+
+  @media screen and (min-width: 940px) {
+    display: none;
+  }
 `
 
 export const Recipient = styled.div`
@@ -75,17 +101,13 @@ export const Messages = styled.div`
   flex-direction: column-reverse;
   flex-grow: 1;
   overflow-y: auto;
-
-  ::-webkit-scrollbar {
-    width: 40px;
-  }
 `
 
 type MessageProps = { incoming?: boolean }
 
 export const Message = styled.div`
   max-width: 80%;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
   padding: 8px;
   display: flex;
   flex-direction: column;

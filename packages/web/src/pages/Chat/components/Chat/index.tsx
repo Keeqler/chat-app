@@ -11,12 +11,7 @@ import { StandardButton } from '@/components/Button'
 import { useAuth } from '@/store/auth'
 import { Message, User } from '@/types'
 
-import {
-  ChatOpenUserIdContext,
-  MessagesContext,
-  OnlineStatusesContext,
-  UsersContext
-} from '../../contexts'
+import { ChatContext } from '../../contexts'
 import { Avatar } from '../Avatar'
 import { Username } from '../Username'
 import * as s from './styles'
@@ -27,10 +22,12 @@ const schema = yup.object().shape({ message: yup.string().min(1) })
 
 export const Chat = ({ socket }: Props) => {
   const user = useAuth(state => state.user)
-  const [users] = useContext(UsersContext)
-  const [messages, setMessages] = useContext(MessagesContext)
-  const [onlineStatuses] = useContext(OnlineStatusesContext)
-  const [chatOpenUserId] = useContext(ChatOpenUserIdContext)
+  const chatContext = useContext(ChatContext)
+  const [users] = chatContext.usersState
+  const [messages, setMessages] = chatContext.messagesState
+  const [onlineStatuses] = chatContext.onlineStatusesState
+  const [chatOpenUserId] = chatContext.chatOpenUserIdState
+  const [, setChatOpenMobile] = chatContext.chatOpenMobileState
   const [formMethods, setFormMethods] = useState<UseFormMethods | null>(null)
   const submitButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -67,7 +64,10 @@ export const Chat = ({ socket }: Props) => {
       updatedAt: new Date().toISOString()
     }
 
-    setMessages(state => ({ ...state, [chatOpenUserId]: [message, ...state[chatOpenUserId]] }))
+    setMessages(state => ({
+      ...state,
+      [chatOpenUserId]: [message, ...(state[chatOpenUserId] || [])]
+    }))
 
     formMethods?.reset()
   }
@@ -81,6 +81,8 @@ export const Chat = ({ socket }: Props) => {
 
   return (
     <s.Chat>
+      <s.GoBackButton onClick={() => setChatOpenMobile(false)} />
+
       <s.Recipient>
         <Avatar image={chatOpenUser.avatar} style={{ marginRight: 10 }} />
 
