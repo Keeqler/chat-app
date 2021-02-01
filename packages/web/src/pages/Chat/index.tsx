@@ -53,6 +53,8 @@ export const ChatPage = () => {
 
       if (!users[senderId]) {
         setUsers(state => ({ ...state, [senderId]: message.sender }))
+
+        socket.emit('onlineStatus', senderId)
       }
 
       if (!messages[senderId]) {
