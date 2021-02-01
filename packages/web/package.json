@@ -33,7 +33,7 @@
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
-    "serve": "serve -l 80 build"
+    "serve": "serve -l 80 -s build"
   },
   "eslintConfig": {
     "extends": [
