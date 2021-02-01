@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  api:
+    image: node
+    working_dir: /usr/app
+    volumes:
+      - .:/usr/app
+    environment:
+      - NODE_ENV=production
+    ports:
+      - 8080:3333
+    restart: on-failure
+    command: sh -c 'yarn workspace api start'
+
+  web:
+    image: node:alpine
+    working_dir: /usr/app
+    volumes:
+      - .:/usr/app
+    environment:
+      - NODE_ENV=production
+    ports:
+      - 80:80
+    stdin_open: true
+    restart: on-failure
+    command: sh -c 'yarn workspace web build && yarn workspace web serve'
+    depends_on:
+      - api
