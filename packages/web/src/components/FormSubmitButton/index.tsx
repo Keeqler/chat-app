@@ -11,8 +11,8 @@ export const FormSubmitButton = forwardRef<HTMLButtonElement, Props>(
     const loading = useContext(FormLoadingContext)
 
     return (
-      <s.Button loading={loading} ref={ref} {...props}>
-        {!loading && children}
+      <s.Button isLoading={loading} ref={ref} {...props}>
+        {!loading && <s.Text>{children}</s.Text>}
         {loading && <s.LoadingCircle src="assets/loading.svg" />}
       </s.Button>
     )

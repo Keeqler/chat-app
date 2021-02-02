@@ -2,11 +2,15 @@ import styled, { keyframes } from 'styled-components'
 
 import { StandardButton } from '@/components/Button'
 
-type ButtonProps = { loading: boolean }
+type ButtonProps = { isLoading: boolean }
 
 export const Button = styled(StandardButton).attrs({ type: 'submit' })`
   margin-top: 40px;
-  cursor: ${({ loading }: ButtonProps) => (loading ? 'default' : 'pointer')};
+  cursor: ${({ isLoading }: ButtonProps) => (isLoading ? 'default' : 'pointer')};
+`
+
+export const Text = styled.span`
+  color: #fff;
 `
 
 const spin = keyframes`
